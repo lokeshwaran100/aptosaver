@@ -260,6 +260,10 @@ export async function stakeUsdcUsdtPair(usdcAmount, usdtAmount) {
             typeArguments: [USDC_TOKEN, USDT_TOKEN],
             functionArguments: [true, usdcAmount, usdtAmount],
         },
+        options: {
+            maxGasAmount: 1300, // Slightly higher than successful tx (1258)
+            gasUnitPrice: 100,  // Same as successful tx
+        },
     });
 
     const committedTxn = await aptos_mainnet.signAndSubmitTransaction({
@@ -277,7 +281,11 @@ export async function unstakeWusdcZusdcPair(lpToken) {
         data: {
             function: `${cellanaAddress}::router::unstake_and_remove_liquidity_both_coins_entry`,
             typeArguments: [wUSDC_TOKEN, zUSDC_TOKEN],
-            functionArguments: [true, lpToken, 0, 0, admin.accountAddress],
+            functionArguments: [true, 10000, 0, 0, admin.accountAddress],
+        },
+        options: {
+            maxGasAmount: 1300, // Slightly higher than successful tx (1258)
+            gasUnitPrice: 100,  // Same as successful tx
         },
     });
 
@@ -297,6 +305,10 @@ export async function unstakeUsdcUsdtPair(lpToken) {
             function: `${cellanaAddress}::router::unstake_and_remove_liquidity_both_coins_entry`,
             typeArguments: [USDC_TOKEN, USDT_TOKEN],
             functionArguments: [true, lpToken, 0, 0, admin.accountAddress],
+        },
+        options: {
+            maxGasAmount: 1300, // Slightly higher than successful tx (1258)
+            gasUnitPrice: 100,  // Same as successful tx
         },
     });
 
