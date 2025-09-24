@@ -8,9 +8,7 @@ async function test() {
   await move.test({
     packageDirectoryPath: "move",
     namedAddresses: {
-      stake_pool_addr: "0x100",
-      fa_obj_addr: "0x200",
-      initial_reward_creator_addr: "0x300",
+      aptosaver_addr: "0x6bb503ba74833ea9f796423285e51e2c4981747e862cd899ed622efdca73ef6e",
     },
   });
 }
