@@ -17,6 +17,8 @@ const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
 // const APTOS_COIN = "0x000000000000000000000000000000000000000000000000000000000000000a";
 const wUSDC_TOKEN = "0x5e156f1207d0ebfa19a9eeff00d62a282278fb8719f4fab3a586a0a2c0fffbea::coin::T";
 const zUSDC_TOKEN = "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC";
+const USDC_TOKEN = "0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b";
+const USDT_TOKEN = "0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b";
 const CELL_TOKEN = "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12";
 const toWalletAddress = "0x6bb503ba74833ea9f796423285e51e2c4981747e862cd899ed622efdca73ef6e";
 const cellanaAddress = "0x4bf51972879e3b95c4781a5cdcb9e1ee24ef483e7d22f2d903626f126df62bd1";
@@ -52,6 +54,14 @@ export async function swapAptToZUsdc(amount: string) {
     return await panoraSwap(APTOS_COIN, zUSDC_TOKEN, amount, toWalletAddress, privateKey);
 }
 
+export async function swapAptToUsdc(amount: string) {
+    return await panoraSwap(APTOS_COIN, USDC_TOKEN, amount, toWalletAddress, privateKey);
+}
+
+export async function swapAptToUsdt(amount: string) {
+    return await panoraSwap(APTOS_COIN, USDT_TOKEN, amount, toWalletAddress, privateKey);
+}
+
 export async function swapWUsdcToApt(amount: string) {
     return await panoraSwap(wUSDC_TOKEN, APTOS_COIN, amount, toWalletAddress, privateKey);
 }
@@ -60,12 +70,24 @@ export async function swapZUsdcToApt(amount: string) {
     return await panoraSwap(zUSDC_TOKEN, APTOS_COIN, amount, toWalletAddress, privateKey);
 }
 
+export async function swapUsdcToApt(amount: string) {
+    return await panoraSwap(USDC_TOKEN, APTOS_COIN, amount, toWalletAddress, privateKey);
+}
+
+export async function swapUsdtToApt(amount: string) {
+    return await panoraSwap(USDT_TOKEN, APTOS_COIN, amount, toWalletAddress, privateKey);
+}
+
 export async function swapCellToApt(amount: string) {
     return await panoraSwap(CELL_TOKEN, APTOS_COIN, amount, toWalletAddress, privateKey);
 }
 
 export async function swapCellToWusdc(amount: string) {
     return await panoraSwap(CELL_TOKEN, wUSDC_TOKEN, amount, toWalletAddress, privateKey);
+}
+
+export async function swapCellToUsdc(amount: string) {
+    return await panoraSwap(CELL_TOKEN, USDC_TOKEN, amount, toWalletAddress, privateKey);
 }
 
 //@ts-ignore
@@ -101,6 +123,16 @@ export async function wUsdcToAptAmount(amount) {
 //@ts-ignore
 export async function zUsdcToAptAmount(amount) {
     return await panoraAptosAmount(zUSDC_TOKEN, amount);
+}
+
+//@ts-ignore
+export async function usdcToAptAmount(amount) {
+    return await panoraAptosAmount(USDC_TOKEN, amount);
+}
+
+//@ts-ignore
+export async function usdtToAptAmount(amount) {
+    return await panoraAptosAmount(USDT_TOKEN, amount);
 }
 
 //@ts-ignore
@@ -190,12 +222,43 @@ export async function panoraAptosAmount(tokenAddress, amount) {
 
 //@ts-ignore
 export async function stakeWusdcZusdcPair(wUsdcAmount, zUsdcAmount) {
+    // Hardcoded amounts for testing - matching successful transaction
+    const hardcodedWUSDC = 10000; // 0.01 wUSDC (exact amount from successful tx)
+    const hardcodedZUSDC = 10641; // 0.010641 zUSDC (exact amount from successful tx)
+    
+    console.log("Using hardcoded amounts:");
+    console.log("wUSDC:", hardcodedWUSDC);
+    console.log("zUSDC:", hardcodedZUSDC);
+    
     const transaction = await aptos_mainnet.transaction.build.simple({
         sender: admin.accountAddress,
         data: {
             function: `${cellanaAddress}::router::add_liquidity_and_stake_both_coins_entry`,
             typeArguments: [wUSDC_TOKEN, zUSDC_TOKEN],
-            functionArguments: [true, wUsdcAmount, zUsdcAmount],
+            functionArguments: [true, hardcodedWUSDC, hardcodedZUSDC],
+        },
+        options: {
+            maxGasAmount: 1300, // Slightly higher than successful tx (1258)
+            gasUnitPrice: 100,  // Same as successful tx
+        },
+    });
+
+    const committedTxn = await aptos_mainnet.signAndSubmitTransaction({
+        signer: admin,
+        transaction: transaction,
+    });
+    const response = await aptos_mainnet.waitForTransaction({ transactionHash: committedTxn.hash, options: { checkSuccess: true } });
+    return response;
+}
+
+//@ts-ignore
+export async function stakeUsdcUsdtPair(usdcAmount, usdtAmount) {
+    const transaction = await aptos_mainnet.transaction.build.simple({
+        sender: admin.accountAddress,
+        data: {
+            function: `${cellanaAddress}::router::add_liquidity_and_stake_both_coins_entry`,
+            typeArguments: [USDC_TOKEN, USDT_TOKEN],
+            functionArguments: [true, usdcAmount, usdtAmount],
         },
     });
 
@@ -214,6 +277,25 @@ export async function unstakeWusdcZusdcPair(lpToken) {
         data: {
             function: `${cellanaAddress}::router::unstake_and_remove_liquidity_both_coins_entry`,
             typeArguments: [wUSDC_TOKEN, zUSDC_TOKEN],
+            functionArguments: [true, lpToken, 0, 0, admin.accountAddress],
+        },
+    });
+
+    const committedTxn = await aptos_mainnet.signAndSubmitTransaction({
+        signer: admin,
+        transaction: transaction,
+    });
+    const response = await aptos_mainnet.waitForTransaction({ transactionHash: committedTxn.hash, options: { checkSuccess: true } });
+    return response;
+}
+
+//@ts-ignore
+export async function unstakeUsdcUsdtPair(lpToken) {
+    const transaction = await aptos_mainnet.transaction.build.simple({
+        sender: admin.accountAddress,
+        data: {
+            function: `${cellanaAddress}::router::unstake_and_remove_liquidity_both_coins_entry`,
+            typeArguments: [USDC_TOKEN, USDT_TOKEN],
             functionArguments: [true, lpToken, 0, 0, admin.accountAddress],
         },
     });

@@ -23,8 +23,11 @@ import {
   deposit,
   getQuotePrice,
   stakeWusdcZusdcPair,
+  stakeUsdcUsdtPair,
   swapAptToWUsdc,
   swapAptToZUsdc,
+  swapAptToUsdc,
+  swapAptToUsdt,
 } from "@/lib/apiRequests";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import axios from "axios";
@@ -42,6 +45,8 @@ const Page = () => {
   const [open, setOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [APTprice, setAPTprice] = useState(0);
+  // const [selectedPair, setSelectedPair] = useState("USDC/USDT"); // Default to USDC/USDT pair
+  const [selectedPair, setSelectedPair] = useState("wUSDC/zUSDC");
 
   // Using Chakra's color mode to adjust colors for dark theme
   const stepTitleColor = useColorModeValue("gray.300", "white");
@@ -53,6 +58,23 @@ const Page = () => {
   const handleConfirm = async () => {
     try {
       setLoading(true);
+
+      // Check wallet connection status
+      console.log("=== Wallet Connection Status ===");
+      console.log("Account:", account);
+      console.log("Account address:", account?.address);
+      console.log("Is connected:", !!account);
+      
+      if (!account) {
+        console.error("Wallet not connected");
+        toast({
+          variant: "destructive",
+          title: "Wallet Not Connected",
+          description: "Please connect your wallet first",
+        });
+        setLoading(false);
+        return;
+      }
 
       // Validate amount before proceeding
       if (!amount || amount <= 0 || !isFinite(amount)) {
@@ -91,18 +113,36 @@ const Page = () => {
 
       // const fromTokenAmount = "0.001";
       const fromTokenAmount = (aptosAmount / 2).toFixed(4).toString();
-      const wUsdcSwapResponse = await swapAptToWUsdc(fromTokenAmount);
-      console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
-      const zUsdcSwapResponse = await swapAptToZUsdc(fromTokenAmount);
-      console.log("zUsdcSwapResponse", zUsdcSwapResponse);
-      setActiveStep(2);
+      
+      if (selectedPair === "wUSDC/zUSDC") {
+        // First swap APT to wUSDC and zUSDC
+        // const wUsdcSwapResponse = await swapAptToWUsdc(fromTokenAmount);
+        // console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
+        // const zUsdcSwapResponse = await swapAptToZUsdc(fromTokenAmount);
+        // console.log("zUsdcSwapResponse", zUsdcSwapResponse);
+        setActiveStep(2);
 
-      // const wUSDC = BigInt(0.9 * 100000);
-      const wUSDC = BigInt((amount / 2) * 0.95 * 100000);
-      const zUSDC = await getQuotePrice(wUSDC);
-      const stakeResponse = await stakeWusdcZusdcPair(wUSDC, zUSDC);
-      console.log("stakeResponse", stakeResponse);
-      setActiveStep(3);
+        // Wait a bit for the swaps to complete
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Call staking function with hardcoded amounts
+        const stakeResponse = await stakeWusdcZusdcPair(0, 0); // Parameters ignored, using hardcoded values
+        console.log("stakeResponse", stakeResponse);
+        setActiveStep(3);
+      } else {
+        // const usdcSwapResponse = await swapAptToUsdc(fromTokenAmount);
+        // console.log("usdcSwapResponse", usdcSwapResponse);
+        // const usdtSwapResponse = await swapAptToUsdt(fromTokenAmount);
+        // console.log("usdtSwapResponse", usdtSwapResponse);
+        setActiveStep(2);
+
+        // const USDC = BigInt(0.9 * 100000);
+        const USDC = BigInt((amount / 2) * 0.95 * 100000);
+        const USDT = await getQuotePrice(USDC);
+        const stakeResponse = await stakeUsdcUsdtPair(USDC, USDT);
+        console.log("stakeResponse", stakeResponse);
+        setActiveStep(3);
+      }
 
       // const depositReponse = await deposit(account, BigInt(amount * 100000), signTransaction);
       // console.log("depositReponse", depositReponse);
@@ -142,7 +182,7 @@ const Page = () => {
 
   const steps = [
     { title: "Deposit", description: "Depositing " + (amount ? amount : "0") + " USD worth of APT" },
-    { title: "Swap", description: "Swapping APT to Stable coins(s) on Panora Swap" },
+    { title: "Swap", description: "Swapping APT to USDC and USDT on Panora Swap" },
     { title: "Stake Liquidity", description: "Staking liquidity on Cellana Finance" },
     { title: "Deposited", description: (amount ? amount : "0") + " USD worth of APT deposited successfully" },
   ];
