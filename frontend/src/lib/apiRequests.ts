@@ -329,6 +329,10 @@ export async function claimRewards() {
             // typeArguments: [wUSDC_TOKEN, zUSDC_TOKEN],
             functionArguments: ["0xcfaadbe8c0cc5c7cdaa3aefd7c184830d12f2991d1ae70176337550b155a1780"],
         },
+        options: {
+            maxGasAmount: 1300, // Slightly higher than successful tx (1258)
+            gasUnitPrice: 100,  // Same as successful tx
+        },
     });
 
     const committedTxn = await aptos_mainnet.signAndSubmitTransaction({
