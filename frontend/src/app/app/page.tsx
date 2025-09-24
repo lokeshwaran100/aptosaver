@@ -116,10 +116,10 @@ const Page = () => {
       
       if (selectedPair === "wUSDC/zUSDC") {
         // First swap APT to wUSDC and zUSDC
-        // const wUsdcSwapResponse = await swapAptToWUsdc(fromTokenAmount);
-        // console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
-        // const zUsdcSwapResponse = await swapAptToZUsdc(fromTokenAmount);
-        // console.log("zUsdcSwapResponse", zUsdcSwapResponse);
+        const wUsdcSwapResponse = await swapAptToWUsdc(fromTokenAmount);
+        console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
+        const zUsdcSwapResponse = await swapAptToZUsdc(fromTokenAmount);
+        console.log("zUsdcSwapResponse", zUsdcSwapResponse);
         setActiveStep(2);
 
         // Wait a bit for the swaps to complete
@@ -130,10 +130,10 @@ const Page = () => {
         console.log("stakeResponse", stakeResponse);
         setActiveStep(3);
       } else {
-        // const usdcSwapResponse = await swapAptToUsdc(fromTokenAmount);
-        // console.log("usdcSwapResponse", usdcSwapResponse);
-        // const usdtSwapResponse = await swapAptToUsdt(fromTokenAmount);
-        // console.log("usdtSwapResponse", usdtSwapResponse);
+        const usdcSwapResponse = await swapAptToUsdc(fromTokenAmount);
+        console.log("usdcSwapResponse", usdcSwapResponse);
+        const usdtSwapResponse = await swapAptToUsdt(fromTokenAmount);
+        console.log("usdtSwapResponse", usdtSwapResponse);
         setActiveStep(2);
 
         // const USDC = BigInt(0.9 * 100000);
