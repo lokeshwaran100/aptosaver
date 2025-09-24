@@ -1,0 +1,14 @@
+name: Trigger Vercel Function
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every 24 hours
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel API
+        run: |
+          curl -X POST https://aptosaver.vercel.app/api/trigger

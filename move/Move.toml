@@ -1,0 +1,11 @@
+[package]
+name = "AptoSaver"
+version = "0.0.0"
+
+[addresses]
+aptosaver_addr = "0xfff0b85abd60c84d99ea725cede9d711276c09e2ec435a45777df0ca933b27cc"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "devnet", subdir = "aptos-move/framework/aptos-framework" }
+
+[dev-dependencies]
