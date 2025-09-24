@@ -162,15 +162,92 @@ module aptosaver_addr::aptosaver {
         borrow_global<AdminData>(@aptosaver_addr).lottery
     }
 
-    // #[test(account = @0x1)]
-    // public entry fun sender_can_set_message(account: signer) acquires MessageHolder {
-    //     let addr = signer::address_of(&account);
-    //     aptos_framework::account::create_account_for_test(addr);
-    //     set_message(account, string::utf8(b"Hello, Blockchain"));
+    #[test_only]
+    public fun pick_winner_for_test(admin: &signer, eligible_users: vector<address>, amount: u64, winner_index: u64)
+    acquires AdminData {
+        let admin_addr = signer::address_of(admin);
+        let admin_data = borrow_global_mut<AdminData>(admin_addr);
+        let winner = vector::borrow(&eligible_users, winner_index);
+        admin_data.winner = *winner;
+        admin_data.lottery = amount;
 
-    //     assert!(
-    //         get_message(addr) == string::utf8(b"Hello, Blockchain"),
-    //         ENO_MESSAGE
-    //     );
-    // }
+        event::emit(WinnerPicked {
+            user: *winner,
+            amount: amount
+        });
+    }
+
+    #[test_only]
+    public fun init_for_test(admin: &signer) {
+        let admin_addr = signer::address_of(admin);
+        if (!exists<AdminData>(admin_addr)) {
+            move_to(admin, AdminData {
+                deposits: 0,
+                winner: admin_addr,
+                lottery: 0
+            });
+        }
+    }
+
+    #[test_only]
+    public fun deposit_for_test(admin: &signer, user: &signer, amount: u64)
+    acquires AdminData, UserData {
+        let user_addr = signer::address_of(user);
+        if(!exists<UserData>(user_addr)){
+            move_to(user, UserData { deposits: amount });
+        } else {
+            let user_data = borrow_global_mut<UserData>(user_addr);
+            user_data.deposits = user_data.deposits + amount;
+        };
+
+        let admin_addr = signer::address_of(admin);
+        assert!(exists<AdminData>(admin_addr), NO_ADMIN_DATA);
+        let admin_data = borrow_global_mut<AdminData>(admin_addr);
+        admin_data.deposits = admin_data.deposits + amount;
+        
+        event::emit(Deposited {
+            user: user_addr,
+            amount: amount
+        });
+    }
+
+    #[test_only]
+    public fun withdraw_for_test(admin: &signer, user: &signer, amount: u64)
+    acquires AdminData, UserData {
+        let user_addr = signer::address_of(user);
+        assert!(exists<UserData>(user_addr), NO_DEPOSITS_TO_WITHDRAW);
+        
+        let user_data = borrow_global_mut<UserData>(user_addr);
+        assert!(user_data.deposits >= amount, WITHDRAW_AMOUNT_EXCEDDED);
+        user_data.deposits = user_data.deposits - amount;
+
+        let admin_addr = signer::address_of(admin);
+        assert!(exists<AdminData>(admin_addr), NO_ADMIN_DATA);
+        let admin_data = borrow_global_mut<AdminData>(admin_addr);
+        admin_data.deposits = admin_data.deposits - amount;
+        
+        event::emit(Withdrawn {
+            user: user_addr,
+            amount: amount
+        });
+    }
+
+    #[test_only]
+    public fun claim_for_test(admin: &signer, user: &signer)
+    acquires AdminData {
+        let user_addr = signer::address_of(user);
+        let admin_addr = signer::address_of(admin);
+        assert!(exists<AdminData>(admin_addr), NO_ADMIN_DATA);
+
+        let admin_data = borrow_global_mut<AdminData>(admin_addr);
+        assert!(admin_data.winner == user_addr, NO_DEPOSITS_TO_WITHDRAW);
+        
+        event::emit(Claimed {
+            user: admin_data.winner,
+            amount: admin_data.lottery
+        });
+
+        admin_data.winner = admin_addr;
+        admin_data.lottery = 0;
+    }
 }
