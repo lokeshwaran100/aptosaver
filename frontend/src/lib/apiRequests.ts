@@ -42,8 +42,8 @@ const admin = Account.fromPrivateKey({
 
 // Initialize the Panora client
 const client = new Panora({
-    // panoraApiKey: "a4^KV_EaTf4MW#ZdvgGKX#HUD^3IFEAOV_kzpIE^3BQGA8pDnrkT7JcIy#HNlLGi",
-    panoraApiKey: "oLujOsvnXgFY9TjN5VxS@u@kmq+wWjcyTEnVL4LEPf5pwNtYdR90EfeBDj33F^4E",
+    panoraApiKey: "a4^KV_EaTf4MW#ZdvgGKX#HUD^3IFEAOV_kzpIE^3BQGA8pDnrkT7JcIy#HNlLGi",
+    // panoraApiKey: "oLujOsvnXgFY9TjN5VxS@u@kmq+wWjcyTEnVL4LEPf5pwNtYdR90EfeBDj33F^4E",
     geomiApiKey: "bot_3NUhSvmZ6Kn_6eQKtLSYpYGcJbXMBzd2m3L1ym7x7MsPu"
 });
 

@@ -76,7 +76,10 @@ const Navbar = () => {
 
   return (
     <>
-      <MoonPayProvider apiKey="pk_test_ipsatS3brsLguHTjxgIAa2Y6a6RBqSm" debug>
+      <MoonPayProvider 
+        apiKey={process.env.NEXT_PUBLIC_MOONPAY_API_KEY || "pk_test_ipsatS3brsLguHTjxgIAa2Y6a6RBqSm"} 
+        debug={process.env.NODE_ENV === 'development'}
+      >
         <header className="px-4 h-14 sticky top-0 inset-x-0 w-full bg-background/40 backdrop-blur-lg border-b border-border z-50">
           <Container reverse>
             <div className="flex items-center justify-between h-full mx-auto md:max-w-screen-xl">
@@ -109,15 +112,24 @@ const Navbar = () => {
                         variant="overlay"
                         baseCurrencyCode="usd"
                         baseCurrencyAmount="100"
-                        defaultCurrencyCode="eth"
+                        defaultCurrencyCode="apt"
+                        walletAddress={account?.address}
                         visible={visible}
+                        onTransactionCompleted={async (transactionData) => {
+                          console.log('Transaction completed:', transactionData);
+                          setVisible(false);
+                        }}
+                        onClose={async () => setVisible(false)}
                       />
-                      <button
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-                        onClick={() => setVisible(!visible)}
-                      >
-                        Buy
-                      </button>
+                      {connected && account?.address && (
+                        <button
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+                          onClick={() => setVisible(!visible)}
+                          title="Buy APT with fiat"
+                        >
+                          Buy APT
+                        </button>
+                      )}
                     </div>
                   </>
                 ) : (
