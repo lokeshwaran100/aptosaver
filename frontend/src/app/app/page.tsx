@@ -54,9 +54,36 @@ const Page = () => {
     try {
       setLoading(true);
 
+      // Validate amount before proceeding
+      if (!amount || amount <= 0 || !isFinite(amount)) {
+        console.error("Invalid deposit amount:", amount);
+        toast({
+          title: "Invalid Amount",
+          description: "Please enter a valid deposit amount greater than 0",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       console.log(`Depositing ${amount} USD`);
-      const aptosAmount = amount / (await aptosPriceInUsd());
-      console.log(`Depositing ${aptosAmount} APTOS`);
+      
+      // Get Aptos price with error handling and fallback
+      let aptosPrice;
+      try {
+        aptosPrice = await aptosPriceInUsd();
+        // If price is 0, null, undefined, or not a valid number, use fallback
+        if (!aptosPrice || aptosPrice <= 0 || !isFinite(aptosPrice)) {
+          throw new Error("Invalid price returned");
+        }
+      } catch (error) {
+        console.warn("Failed to get Aptos price from Panora, using fallback price:", error);
+        // Fallback to approximate Aptos price (update this periodically with current market price)
+        aptosPrice = 10.0; // Approximate APT price in USD - update this as needed
+      }
+      
+      const aptosAmount = amount / aptosPrice;
+      console.log(`Depositing ${aptosAmount} APTOS (at $${aptosPrice} per APT)`);
 
       const depositReponse = await deposit(account, BigInt(amount * 100000), signTransaction);
       console.log("depositReponse", depositReponse);
@@ -127,7 +154,13 @@ const Page = () => {
 
   useEffect(() => {
     async function fetchData() {
-      setAPTprice(await aptosPriceInUsd());
+      try {
+        const price = await aptosPriceInUsd();
+        setAPTprice(price);
+      } catch (error) {
+        console.warn("Failed to fetch APT price, using fallback:", error);
+        setAPTprice(10.0); // Fallback price
+      }
     }
 
     fetchData();

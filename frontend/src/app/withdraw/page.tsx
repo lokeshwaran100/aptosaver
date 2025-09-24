@@ -142,7 +142,13 @@ const Page = () => {
 
   useEffect(() => {
     async function fetchData() {
-      setAPTprice(await aptosPriceInUsd());
+      try {
+        const price = await aptosPriceInUsd();
+        setAPTprice(price);
+      } catch (error) {
+        console.warn("Failed to fetch APT price, using fallback:", error);
+        setAPTprice(10.0); // Fallback price
+      }
     }
 
     fetchData();
