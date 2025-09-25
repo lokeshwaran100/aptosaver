@@ -22,6 +22,9 @@ mongoose.connect(mongoURI).then(() => console.log("Connected! to db"));
 
 export const POST = async (request: NextRequest) => {
   try {
+    // Environment variable to control PanoraSwap API calls (default: true)
+    const enablePanoraSwap = process.env.NEXT_PUBLIC_ENABLE_PANORASWAP !== 'false';
+    
     const existingUsers = await Document.find({});
     if (!existingUsers) {
       return NextResponse.json({ error: "Not registered users" }, { status: 409 });
@@ -33,7 +36,13 @@ export const POST = async (request: NextRequest) => {
       return sum + item.totalDeposits;
     }, 0);
 
-    // const cellTokenPriceInUsd = await cellTokenPrice();
+    let cellTokenPriceInUsd = 0;
+    if (enablePanoraSwap) {
+      cellTokenPriceInUsd = await cellTokenPrice();
+    } else {
+      console.log("PanoraSwap calls disabled - skipping cellTokenPrice");
+    }
+    
     const totalDepositsFivePercentage = totalDeposits * 0.05;
     const totalDepositsFivePercentagePerDay = totalDepositsFivePercentage / 365;
     // const totalDepositsFivePercentagePerDayInCell = totalDepositsFivePercentagePerDay / cellTokenPriceInUsd
@@ -50,8 +59,12 @@ export const POST = async (request: NextRequest) => {
       // console.log("rewardAmount", rewardAmount)
       // const rewardAmountInStr = (parseInt(rewardAmount as string) / 1e8).toString()
       // const rewardAmountInStr = "0.001"
-      const swapCellToWusdcResponse = await swapCellToWusdc(rewardAmount.toString());
-      console.log("swapCellToWusdcResponse", swapCellToWusdcResponse);
+      if (enablePanoraSwap) {
+        const swapCellToWusdcResponse = await swapCellToWusdc(rewardAmount.toString());
+        console.log("swapCellToWusdcResponse", swapCellToWusdcResponse);
+      } else {
+        console.log("PanoraSwap calls disabled - skipping swapCellToWusdc");
+      }
 
       const pickWinnerResponse = await pickWinner(eligibleUsers, lotteryAmount);
       console.log("pickWinnerResponse", pickWinnerResponse);

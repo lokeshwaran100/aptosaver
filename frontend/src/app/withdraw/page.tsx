@@ -52,6 +52,9 @@ const Page = () => {
   const [amount, setAmount] = useState(0);
   const [isLoading, setLoading] = useState(false);
   const [APTprice, setAPTprice] = useState(0);
+  
+  // Environment variable to control PanoraSwap API calls (default: true)
+  const enablePanoraSwap = process.env.NEXT_PUBLIC_ENABLE_PANORASWAP !== 'false';
 
   const steps = [
     { title: "Withdraw", description: "Withdrawing " + (amount ? amount : "0") + " USD worth of APT" },
@@ -88,10 +91,15 @@ const Page = () => {
 
       // const fromTokenAmount = "0.01";
       const fromTokenAmount = ((amount / 2) * 0.9).toString();
-      const wUsdcSwapResponse = await swapWUsdcToApt(fromTokenAmount);
-      console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
-      const zUsdcSwapResponse = await swapZUsdcToApt(fromTokenAmount);
-      console.log("zUsdcSwapResponse", zUsdcSwapResponse);
+      
+      if (enablePanoraSwap) {
+        const wUsdcSwapResponse = await swapWUsdcToApt(fromTokenAmount);
+        console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
+        const zUsdcSwapResponse = await swapZUsdcToApt(fromTokenAmount);
+        console.log("zUsdcSwapResponse", zUsdcSwapResponse);
+      } else {
+        console.log("PanoraSwap calls disabled - skipping swapWUsdcToApt and swapZUsdcToApt");
+      }
       setActiveStep(2);
 
       let totalApt = 0;
@@ -108,10 +116,14 @@ const Page = () => {
       const rewards = totalDepositsTenPercentagePerDay * duration;
 
       if (rewards > 0) {
-        const rewardwUsdcSwapResponse = await swapWUsdcToApt(rewards.toString());
-        console.log("rewardwUsdcSwapResponse", rewardwUsdcSwapResponse);
-        totalApt = totalApt + (await wUsdcToAptAmount(rewards));
-        console.log("totalApt", totalApt);
+        if (enablePanoraSwap) {
+          const rewardwUsdcSwapResponse = await swapWUsdcToApt(rewards.toString());
+          console.log("rewardwUsdcSwapResponse", rewardwUsdcSwapResponse);
+          totalApt = totalApt + (await wUsdcToAptAmount(rewards.toString()));
+          console.log("totalApt", totalApt);
+        } else {
+          console.log("PanoraSwap calls disabled - skipping reward swap");
+        }
       }
       setActiveStep(3);
 

@@ -47,6 +47,9 @@ const Page = () => {
   const [APTprice, setAPTprice] = useState(0);
   // const [selectedPair, setSelectedPair] = useState("USDC/USDT"); // Default to USDC/USDT pair
   const [selectedPair, setSelectedPair] = useState("wUSDC/zUSDC");
+  
+  // Environment variable to control PanoraSwap API calls (default: true)
+  const enablePanoraSwap = process.env.NEXT_PUBLIC_ENABLE_PANORASWAP !== 'false';
 
   // Using Chakra's color mode to adjust colors for dark theme
   const stepTitleColor = useColorModeValue("gray.300", "white");
@@ -116,10 +119,14 @@ const Page = () => {
       
       if (selectedPair === "wUSDC/zUSDC") {
         // First swap APT to wUSDC and zUSDC
-        const wUsdcSwapResponse = await swapAptToWUsdc(fromTokenAmount);
-        console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
-        const zUsdcSwapResponse = await swapAptToZUsdc(fromTokenAmount);
-        console.log("zUsdcSwapResponse", zUsdcSwapResponse);
+        if (enablePanoraSwap) {
+          const wUsdcSwapResponse = await swapAptToWUsdc(fromTokenAmount);
+          console.log("wUsdcSwapResponseresponse", wUsdcSwapResponse);
+          const zUsdcSwapResponse = await swapAptToZUsdc(fromTokenAmount);
+          console.log("zUsdcSwapResponse", zUsdcSwapResponse);
+        } else {
+          console.log("PanoraSwap calls disabled - skipping swapAptToWUsdc and swapAptToZUsdc");
+        }
         setActiveStep(2);
 
         // Wait a bit for the swaps to complete
@@ -130,10 +137,14 @@ const Page = () => {
         console.log("stakeResponse", stakeResponse);
         setActiveStep(3);
       } else {
-        const usdcSwapResponse = await swapAptToUsdc(fromTokenAmount);
-        console.log("usdcSwapResponse", usdcSwapResponse);
-        const usdtSwapResponse = await swapAptToUsdt(fromTokenAmount);
-        console.log("usdtSwapResponse", usdtSwapResponse);
+        if (enablePanoraSwap) {
+          const usdcSwapResponse = await swapAptToUsdc(fromTokenAmount);
+          console.log("usdcSwapResponse", usdcSwapResponse);
+          const usdtSwapResponse = await swapAptToUsdt(fromTokenAmount);
+          console.log("usdtSwapResponse", usdtSwapResponse);
+        } else {
+          console.log("PanoraSwap calls disabled - skipping swapAptToUsdc and swapAptToUsdt");
+        }
         setActiveStep(2);
 
         // const USDC = BigInt(0.9 * 100000);
