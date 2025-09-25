@@ -1,23 +1,73 @@
-# Stake Pool Template
+# AptoSaver Smart Contracts
 
-## Overview
+AptoSaver's Move smart contracts implement a high-yield crypto savings platform on Aptos blockchain with automated yield optimization, gamified rewards, and seamless user experience.
 
-- The stake pool template lets contract deployer choose an arbitrary fungible asset as the staked asset, and an arbitrary fungible asset as the reward asset.
-- The reward creator set in config can create reward schedules with a reward per second (RPS) rate and a duration in seconds.
-  - Note: in current implementation, only 1 reward schedule is allowed. If you want to create multiple reward schedules, you need to deploy multiple stake pools.
-- Users can stake their assets in the pool and claim rewards based on the reward schedule.
+## 🏗 Architecture Overview
 
-## Reward calculation
+The AptoSaver protocol consists of several interconnected smart contracts that manage:
 
-- We first calculate reward index, reward index is amount of reward per staked asset.
-  ```
-  reward index = old_index + (current_ts - last_update_ts) * rps / total_stake
-  ```
-- Then we calculate reward for a user
-  ```
-  reward = user_stake * (reward_index - user_index_at_last_claim)
-  ```
+- **User Deposits**: Secure deposit and withdrawal mechanisms
+- **Lottery System**: Gamified rewards with on-chain randomness
+- **Asset Management**: Integration with PanoraSwap and Cellana Finance
+- **Fee Management**: Protocol fee collection and distribution
 
-## Limitation
+## 🔧 Core Features
 
-For simplicity of the template, we didn't implement the function for the reward provider to claim back any orphaned reward after the duration has passed. There are are multiple ways to implement this, the simplest way is to transfer all the reward left from reward store after the duration has passed, but this makes anyone who still has pending claim reward have no reward to claim.
+### High-Yield Savings
+- **Guaranteed 10%+ APY**: Fixed minimum returns for users
+- **Auto-Optimization**: Automated yield farming across protocols
+- **No Lock-in**: Withdraw funds anytime without penalties
+- **Compound Interest**: Automatic reinvestment of earned yields
+
+### Gamification Layer
+- **Lucky Draw System**: Lottery rewards from excess yield
+- **On-chain Randomness**: Fair and transparent winner selection
+- **Bonus Rewards**: Additional incentives for long-term savers
+
+## 📋 Smart Contract Functions
+
+### User Operations
+
+```move
+// Deposit assets into the savings pool
+public entry fun deposit(account: &signer, amount: u64)
+
+// Withdraw assets from the savings pool
+public entry fun withdraw(account: &signer, amount: u64)
+
+// Claim accumulated rewards
+public entry fun claim_rewards(account: &signer)
+
+// Check user balance and earned rewards
+public fun get_user_info(user_addr: address): (u64, u64)
+```
+
+## 🚀 Deployment
+
+### Prerequisites
+- Aptos CLI installed
+- Funded Aptos account
+- Move compiler setup
+
+### Compilation
+```bash
+# Compile the Move contracts
+npm run move:compile
+```
+
+### Testing
+```bash
+# Run comprehensive tests
+npm run move:test
+```
+
+### Deployment
+```bash
+# Deploy to testnet
+npm run move:publish
+
+# Verify deployment
+aptos account list --query modules --account <deployed_address>
+```
+
+For detailed contribution guidelines, see the main project README.
