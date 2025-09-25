@@ -2,6 +2,10 @@
 
 AptoSaver is a DeFi platform built on the Aptos blockchain, enabling fixed-deposit–style crypto savings with high yield and seamless user experience. Users earn 10%+ APY, withdraw anytime with no lock-in, and gain gamified lottery rewards. The protocol auto-optimizes staking for yield and supports fiat onboarding for emerging markets.
 
+## 🚀 Demo
+
+**[View Live Demo](https://www.canva.com/design/DAGz9Nmembw/JfIttWqDfZ9YrsXks3LvcQ/edit?utm_content=DAGz9Nmembw&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)**
+
 ***
 
 ## Tech Stack
