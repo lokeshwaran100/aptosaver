@@ -16,6 +16,8 @@ export function AnimatedModalDemo({isUserWon}:{isUserWon: Boolean}) {
   const { setOpen, open } = useModal();
   const [revealed, setRevealed] = useState(false);
 
+  console.log("AnimatedModalDemo render:", { isUserWon, revealed, open });
+
   const handleClick = () => {
     const end = Date.now() + 3 * 1000;
 
@@ -28,49 +30,76 @@ export function AnimatedModalDemo({isUserWon}:{isUserWon: Boolean}) {
     frame();
   };
 
-  const handleRevealed= async ()=>{
+  const handleRevealed = async () => {
     setRevealed(true);
-      if(isUserWon)
-      {
-        const end = Date.now() + 1 * 1000; // 3 seconds
-        const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
-     
-        const frame = () => {
-          if (Date.now() > end) return;
-     
-          confetti({
-            particleCount: 2,
-            angle: 60,
-            spread: 55,
-            startVelocity: 60,
-            origin: { x: 0, y: 0.5 },
-            colors: colors,
-          });
-          confetti({
-            particleCount: 2,
-            angle: 120,
-            spread: 55,
-            startVelocity: 60,
-            origin: { x: 1, y: 0.5 },
-            colors: colors,
-          });
-     
-          requestAnimationFrame(frame);
-        };
-     
-        frame();
-      }
-    const response = await axios.put("/api/user", {
-      params: { address: account?.address, cardScratched: true },
-    });    
-    console.log("card scratched", response);
+    
+    if (isUserWon) {
+      // Enhanced confetti animation for winners
+      const end = Date.now() + 3 * 1000; // 3 seconds
+      const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1", "#F87AFF", "#FB93D0", "#FFDD99", "#C3F0B2"];
+   
+      const frame = () => {
+        if (Date.now() > end) return;
+   
+        // Multiple confetti bursts
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          startVelocity: 60,
+          origin: { x: 0, y: 0.5 },
+          colors: colors,
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          startVelocity: 60,
+          origin: { x: 1, y: 0.5 },
+          colors: colors,
+        });
+        // Center burst
+        confetti({
+          particleCount: 3,
+          angle: 90,
+          spread: 45,
+          startVelocity: 60,
+          origin: { x: 0.5, y: 0.3 },
+          colors: colors,
+        });
+   
+        requestAnimationFrame(frame);
+      };
+   
+      frame();
+      
+      // Additional celebration burst
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: colors,
+        });
+      }, 500);
+    }
+    
+    // Update the card scratched status
+    try {
+      const response = await axios.put("/api/user", {
+        params: { address: account?.address, cardScratched: true },
+      });    
+      console.log("card scratched", response);
+    } catch (error) {
+      console.error("Error updating card scratched status:", error);
+    }
   }
 
   useEffect(() => {
-    // if (!open) return;
+    console.log("AnimatedModalDemo useEffect triggered");
     handleClick();
     setOpen(true);
-  }, []);
+  }, [setOpen]);
 
   const onClaim = async() => {
     try {
@@ -116,34 +145,53 @@ export function AnimatedModalDemo({isUserWon}:{isUserWon: Boolean}) {
       <div className="py-40  flex items-center justify-center min-h-full">
         <ModalBody className="bg-gray-900 dark:border-white h-2/4">
             {
-              revealed?(isUserWon?(
-                <ModalContent className="text-white h-full">
-                <p className="text-4xl font-semibold text-center mb-8 bg-[linear-gradient(to_right,#F87AFF,#FB93D0,#FFDD99,#C3F0B2)] text-transparent bg-clip-text [-webkit-background-clip:text]">
-                  Hoorah! You won the lottery today!
-                </p>
-                <div className="flex justify-center items-center h-full text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-                  $1.33 USD
-                </div>
-                <button 
-                className="mx-auto rounded-full border-2 border-gray-300 py-3 px-5 hover:bg-slate-200 text-xl bg-[linear-gradient(to_right,#F87AFF,#FB93D0,#FFDD99,#C3F0B2)] text-transparent bg-clip-text [-webkit-background-clip:text]"
-                onClick={onClaim}
-                >
-                  Claim
-                  </button>
-              </ModalContent>
-              ):(<ModalContent className="text-white h-full">
-                <p className="text-4xl font-bold text-center mb-8 text-gray-400">
-                Sorry Better Luck Next Time
-              </p>
-              </ModalContent>)):(
-                <div onClick={()=>handleRevealed()}>
-                <ModalContent className=" border-black text-black cursor-pointer" >
-                <div>
-                    <div className="flex justify-center items-center h-full text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-                    Reveal
-                </div>
-                </div>
-                </ModalContent>
+              revealed ? (
+                isUserWon ? (
+                  <ModalContent className="text-white h-full flex flex-col justify-center items-center">
+                    <p className="text-4xl font-semibold text-center mb-8 bg-[linear-gradient(to_right,#F87AFF,#FB93D0,#FFDD99,#C3F0B2)] text-transparent bg-clip-text [-webkit-background-clip:text]">
+                      🎉 Hoorah! You won the lottery today! 🎉
+                    </p>
+                    <div className="flex justify-center items-center text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-8">
+                      $1.33 USD
+                    </div>
+                    <button 
+                      className="mx-auto rounded-full border-2 border-gray-300 py-3 px-8 hover:bg-slate-200 hover:text-black transition-all duration-300 text-xl bg-[linear-gradient(to_right,#F87AFF,#FB93D0,#FFDD99,#C3F0B2)] text-transparent bg-clip-text [-webkit-background-clip:text] font-bold"
+                      onClick={onClaim}
+                    >
+                      Claim Reward
+                    </button>
+                  </ModalContent>
+                ) : (
+                  <ModalContent className="text-white h-full flex flex-col justify-center items-center">
+                    <div className="text-6xl mb-6">😔</div>
+                    <p className="text-4xl font-bold text-center mb-4 text-gray-300">
+                      Better Luck Next Time!
+                    </p>
+                    <p className="text-lg text-center text-gray-400 mb-8">
+                      Keep depositing to increase your chances of winning the daily lottery.
+                    </p>
+                    <button 
+                      className="mx-auto rounded-full border-2 border-gray-500 py-3 px-8 hover:bg-gray-700 transition-all duration-300 text-lg text-gray-300 hover:text-white"
+                      onClick={() => setOpen(false)}
+                    >
+                      Try Again Tomorrow
+                    </button>
+                  </ModalContent>
+                )
+              ) : (
+                <div onClick={() => {
+                  console.log("Reveal card clicked!");
+                  handleRevealed();
+                }} className="cursor-pointer">
+                  <ModalContent className="text-white h-full flex flex-col justify-center items-center hover:bg-gray-800 transition-all duration-300">
+                    <div className="text-6xl mb-6">🎁</div>
+                    <div className="flex justify-center items-center text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-4">
+                      Reveal
+                    </div>
+                    <p className="text-lg text-center text-gray-400">
+                      Click to scratch and reveal your prize!
+                    </p>
+                  </ModalContent>
                 </div>
               )
             }

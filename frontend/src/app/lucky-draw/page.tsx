@@ -83,7 +83,7 @@ const LuckyDrawPage = () => {
   const [userData, setUserData] = useState<UserData[]>([]);
   const { account, connected } = useWallet();
   const [isUserWon, setIsUserWon] = useState(false);
-  const [cardScratched, setCardScratched] = useState(true);
+  const [cardScratched, setCardScratched] = useState(false);
 
   // useEffect(() => {
   //   async function connect() {
@@ -124,16 +124,26 @@ const LuckyDrawPage = () => {
     if (!account?.address) return;
     console.log(account?.address);
     async function checkIfWinner() {
+      // Check for environment variable simulation first
+      const simulateWinner = process.env.NEXT_PUBLIC_SIMULATE_WINNER === 'true';
+      
+      if (simulateWinner) {
+        console.log("Simulating winner from environment variable");
+        setIsUserWon(true);
+        setCardScratched(false); // Ensure card can be scratched
+        return;
+      }
+
       const response = await axios.get("/api/user", {
         params: { address: account?.address },
       });
       console.log("user data fetch", response);
-      setIsUserWon(response.data.wonToday);
-      setCardScratched(response.data.cardScratched);
+      setIsUserWon(response.data.wonToday || false);
+      setCardScratched(response.data.cardScratched || false);
     }
 
     checkIfWinner();
-  }, []);
+  }, [account?.address]);
 
   return (
     <>
@@ -199,10 +209,21 @@ const LuckyDrawPage = () => {
         </TableFooter> */}
         </Table>
         {
-          !cardScratched && (<Modal>
-            <AnimatedModalDemo isUserWon={isUserWon} />
-          </Modal>)
+          !cardScratched && (
+            <Modal>
+              <AnimatedModalDemo isUserWon={isUserWon} />
+            </Modal>
+          )
         }
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="fixed bottom-4 right-4 bg-black bg-opacity-75 text-white p-4 rounded text-sm">
+            <div>cardScratched: {cardScratched.toString()}</div>
+            <div>isUserWon: {isUserWon.toString()}</div>
+            <div>account: {account?.address ? 'Connected' : 'Not connected'}</div>
+            <div>showModal: {(!cardScratched).toString()}</div>
+          </div>
+        )}
       </div>
     </>
   );
